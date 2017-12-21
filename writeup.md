@@ -175,7 +175,7 @@ I believe the pipeline is vulnerable in following cases:
 - Too much noise in the Camera which also contributes towards wrongly selected thresholding parameters
 - Sharp turns along with fast speed of car
 
-What could you do to make it more robust?
+If more time permit I am interested in following improvements to make it more robust:
 - Using the multiple detection mechanism e.g similar method used in first project of using hough transformation along with the currently implemented algorithm. At the end apply credit-based mechanism to decide which lane line to consider if both algorithms give different results
 - Improved morphological operation like eroding and dilating applied on binary image
 - Improved sanity check and use prediction mechanism based on the other road surrounding. main goal will be never to go off the road in any case.
