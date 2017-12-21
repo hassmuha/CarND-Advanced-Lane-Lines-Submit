@@ -45,7 +45,7 @@ You're reading it!
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in the first code cell of the IPython notebook located in "./main.ipynb" .  
 
 I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
 
@@ -58,30 +58,35 @@ Undistorted Image
 
 ### Pipeline (single images)
 
-let's start with test1 image as shown below
+let's start with test1 image as shown below:
+
 ![alt text][image3]
 
 #### 1. Provide an example of a distortion-corrected image.
 
-I have defined a new funciton so that same function can be used for processing video frames as well. This is defined as `distort_correct()` which is using the opencv function `cv2.undistort()` and calibration and distortion cooefficients calculated as describe above to calculate the undistorted test image. Both the original and undistorted image is shown below:
+I have defined a new funciton so that same function can be used for processing video frames as well. This is defined as `distort_correct()` which is using the opencv function `cv2.undistort()` and calibration and distortion coefficients as describe above to calculate the undistorted test image. The undistorted test1 image is shown below:
+
 ![alt text][image4]
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
 I used a combination of color and gradient thresholds to generate a binary image.  I used following steps as present in the function `pipeline()` :
 
-1) Color space conversion : RGB to in HLS
-2) Applying guassian smoothing on L plane to prepare to calculate gradient on that plane. The video seems alread blurred so I used the mask of 3 x 3.
-3) Apply x-gradient with Sobel mask of size of 5 on L-plane. The L plane is selected as it contain major features of the whole scene along with presence of clear edges. Based on the fact that we are interested on lane lines x gradient was enough. The threshhold image `gradx_L` is calculated by applying thresholding on the absolute of gradient image with values between 20 to 100 are considered as white. This is shown in the figure below:
+1) Color space conversion : RGB to HLS
+2) Applying gaussian smoothing on L plane to prepare to calculate gradient on that plane. The video seems already blurred so I used the mask of 3 x 3.
+3) Apply x-gradient with Sobel mask of size of 5x5 on L-plane. The L plane is selected as it contain major features of the whole scene along with presence of clear edges. Based on the fact that we are interested on lane lines x-gradient was enough. The threshold image `gradx_L` is calculated by applying thresholding on the absolute of gradient image with values between 20 to 100 are considered as white. This is shown in the figure below:
+
 ![alt text][image5]
 
 4) Simple thresholding is applied on S-plane with values between 140 to 255 taken as white. The reason is it will help to detect yellow and clear white lines if present in the image while not being effected by different change in lighting conditions. The resulted image is store in the variable `s_binary` and picture is shown below
+
 ![alt text][image6]
 
 5) Simple thresholding is applied on H-plane with values between (15, 40) taken as white. The result shown below also shows it will also be able to detect yellow and white lines. The resulted image is store in the variable `h_binary`:
+
 ![alt text][image7]
 
-6) Then combine `s_binary` and `h_binary` with 'and' operation. this reduces a lot of noise and make sure pure lane lines will be detected. The resulted image is store in the variable `combined_sh` and resulted image is shown below:
+6) Then combine `s_binary` and `h_binary` with 'and' operation. this reduces a lot of noise and make sure pure lane lines will be detected. The resulted image is stored in the variable `combined_sh` and resulted image is shown below:
 ![alt text][image8]
 
 
@@ -95,8 +100,7 @@ I used a combination of color and gradient thresholds to generate a binary image
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-- performed on done on the straight line straight_lines1.jpg
-For taking the perspective transformation I selected four points on the road and they are more or less form a shape of trapezoid as shown in the picture below and mapped it to a rectangle. The code is show in the line ''.
+For taking the perspective transformation I selected four points on the straight road images provided and these points form more or less a shape of trapezoid. As a destination I mapped it to a rectangle. The code is shown in the section 'Apply a perspective transform to rectify binary image'.
 
 This resulted in the following source trapezoid and destination rectangle points are given in the table:
 
@@ -107,23 +111,25 @@ This resulted in the following source trapezoid and destination rectangle points
 | 1127, 720     | 960, 720      |
 | 695, 460      | 960, 0        |
 
-Moreover  `cv2.getPerspectiveTransform(src,dst)` function is used to get the perspective transformation and defined the my own `wrap_perspectTransform()` which takes the perpective matrix and the image as input and using `cv2.warpPerspective()` transformed the input image and returns the warped image as output. For showing the results I am taking the undistorted thresholded image as input and after transformation wraped image is shown below:
+Moreover  `cv2.getPerspectiveTransform(src,dst)` function is used to get the perspective transformation and defined the my own `wrap_perspectTransform()` which takes the perspective matrix and the image as input and using `cv2.warpPerspective()` transformed the input image and returns the warped image as output. For showing the results, I am taking the undistorted threshold image as input and after transformation warped image is shown below:
+
+![alt text][image11]
+
 
 The lane lines appear parallel in the warped image, this provide us confidence that the transformation is working fine and later using the angle of curvature we can also confirm this.
 
-![alt text][image11]
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
 I have used the two functions as provided in the lecture `slidingwindow_polyfit(...)` and `lookAhead_polyfit(...)`
-this uses the technique of partitioning the whole image into segments along y axis. Then find possible location of left and right plane starting from the bottom segment and moving up till the first segment.
+Function `slidingwindow_polyfit(...)` uses the technique of partitioning the whole image into segments along y axis. Then find possible location of left and right plane starting from the bottom segment and moving up till the first segment.
 For the first segment histogram is calculated along x-axis. Then pass a separate window search to find peaks of the histogram which are parts of left and right lane. The final position of window in each segment also serves as starting point to find the left and right lane in next upper segment, so called seed. Widow is move left and right to find best peak. And keep applying these steps till the top segment of the image. For each segment and for each lane I took center of the window points to fit 2nd order polynomial function. This is done in by using `numpy.polyfit(...)` function.
 
 In the figure below the detected widow peak is shown along with curve line is also drawn which is calculated based on the polynomial coefficients found :
 
 ![alt text][image12]
 
-But for the video pipeline `lookAhead_polyfit(...)` is also used, this step will be explained later but main idea here is not to perform the sliding window step to avoid computation and exploit the temporal locality fact that in two consecutive frames there would be no much change in the position of lane lines with respect to previous images. Moreover also helps is in case of some noise present in the image and histogram leads us to wrong initial seed.
+But for the video pipeline `lookAhead_polyfit(...)` is also used, this step will be explained later but main idea here is not to perform the sliding window step to avoid computation and exploit the temporal fact that in two consecutive frames there would be no much change in the position of lane lines with respect to previous images. Moreover this also helps in case of some noise present in the image and histogram leads to wrong initial seed.
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
@@ -149,26 +155,28 @@ I implemented this step in function `plot_result()`.  Here is an example of my r
 
 Here's a [link to my video result][video1]
 
-both are considered so should be included video pipeline overview
-For a standout submission, you should follow the suggestion in the lesson to not just search blindly for the lane lines in each frame of video, but rather, once you have a high-confidence detection, use that to inform the search for the position of the lines in subsequent frames of video. For example, if a polynomial fit was found to be robust in the previous frame, then rather than search the entire next frame for the lines, just a window around the previous detection could be searched. This will improve speed and provide a more robust method for rejecting outliers.
 
-For an additional improvement you should implement outlier rejection and use a low-pass filter to smooth the lane detection over frames, meaning add each new detection to a weighted mean of the position of the lines to avoid jitter.
+For the frame, the pipeline is present in the function `process_frame(...)`. I have also uses the sanity check to find the relation of probable detected line with lane lines detected in previous frames. Moreover Look-Ahead Filter approach is also used to get advantage from the fact, each corresponding frame contains similar traits as previous frames and no need to blindly start searching of lane lines within frame. Other feather like suggested e.g. smoothing of lane lines before drawing and Reset of previous history in case of Sanity check fails for consecutive frames.
+
 
 ---
 
 ### Discussion
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+Listed below are some of the problems which I have faced during the implementation of the project:
+- Generation of binary images and which plane to consider for gradient and for which planes only thresholding works well. Moreover the selection of threshold parameters for different planes
+- Selection of source and destination points for perspective transformation.
+- Defining a good sanity check algorithm when to accept lane lines from the current frame and when to reject it.
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.
-
-Where will your pipeline likely fail?
-for a long time non presence of any detected line due to failure of parameters and steps used in thresholding techniques
-sharp patches on the road which are also parallel to lane Lines and look also similar.
-too much noise in the Camera which also contributes towards false thresholding
-check points from the guidelines
+I believe the pipeline is vulnerable in following cases:
+- For a long time non presence of any detected lines due to failure in extracting lane lines in gradient and thresholded binary images
+- Sharp patches on the road which are also parallel to lane Lines and look also similar.
+- Too much noise in the Camera which also contributes towards wrongly selected thresholding parameters
+- Sharp turns along with fast speed of car
 
 What could you do to make it more robust?
-using the double detection mechanism e.g similar method used on first project of using hough trnasformation and credit Based t decide about the final result
-based on the fact that the distance between should remain the same we can use this info both in Look-Ahead Filter and Sanity Check.
-improved morphological operation like eroding and dilating
+- Using the multiple detection mechanism e.g similar method used in first project of using hough transformation along with the currently implemented algorithm. At the end apply credit-based mechanism to decide which lane line to consider if both algorithms give different results
+- Improved morphological operation like eroding and dilating applied on binary image
+- Improved sanity check and use prediction mechanism based on the other road surrounding. main goal will be never to go off the road in any case.
+- Use machine learning approaches as well beside conventional image processing for example what we did in the Behavioral Cloning Project.
