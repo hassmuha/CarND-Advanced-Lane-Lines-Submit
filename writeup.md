@@ -14,7 +14,7 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./test_images/original_image.jpg "Checkerboard Original Image"
+[image1]: ./examples/original_image.jpg "Checkerboard Original Image"
 [image2]: ./examples/undistort_image.jpg "Undistorted Checkerboard"
 [image3]: ./examples/test1.jpg "test Image"
 [image4]: ./examples/test1_undistorted.jpg "Test Image undistorted"
@@ -27,7 +27,7 @@ The goals / steps of this project are the following:
 [image11]: ./examples/warped.jpg "Wraped Image"
 [image12]: ./examples/sliding_window.jpg "Sliding Window Search and Polynomial Fit"
 [image13]: ./examples/Final_result.jpg "Final Result"
-[video1]: ./project_video_out.mp4 "Video"
+[video1]: https://github.com/hassmuha/CarND-Advanced-Lane-Lines-Submit/blob/master/project_video_out.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -52,6 +52,7 @@ I start by preparing "object points", which will be the (x, y, z) coordinates of
 I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result:
 
 ![alt text][image1]
+
 Undistorted Image
 ![alt text][image2]
 
@@ -146,7 +147,7 @@ I implemented this step in function `plot_result()`.  Here is an example of my r
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result][video1]
 
 both are considered so should be included video pipeline overview
 For a standout submission, you should follow the suggestion in the lesson to not just search blindly for the lane lines in each frame of video, but rather, once you have a high-confidence detection, use that to inform the search for the position of the lines in subsequent frames of video. For example, if a polynomial fit was found to be robust in the previous frame, then rather than search the entire next frame for the lines, just a window around the previous detection could be searched. This will improve speed and provide a more robust method for rejecting outliers.
