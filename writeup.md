@@ -27,7 +27,7 @@ The goals / steps of this project are the following:
 [image11]: ./examples/warped.jpg "Wraped Image"
 [image12]: ./examples/sliding_window.jpg "Sliding Window Search and Polynomial Fit"
 [image13]: ./examples/Final_result.jpg "Final Result"
-[video1]: https://github.com/hassmuha/CarND-Advanced-Lane-Lines-Submit/blob/master/project_video_out.mp4 "Video"
+[video1]: ./project_video_out.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
